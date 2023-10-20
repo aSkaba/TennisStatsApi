@@ -14,7 +14,6 @@ import java.util.List;
 
 public class DataUtil {
 
-
     private static final String DATA_FILE = "dataPlayers.json";
     private static List<Player> players;
 

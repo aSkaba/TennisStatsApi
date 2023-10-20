@@ -1,18 +1,21 @@
 package fr.ali.amanzegouarene.tennisstatsapi.service;
 
+import fr.ali.amanzegouarene.tennisstatsapi.entity.PlayerEntity;
 import fr.ali.amanzegouarene.tennisstatsapi.exceptions.InternalServerErrorErrorException;
 import fr.ali.amanzegouarene.tennisstatsapi.model.Player;
+import fr.ali.amanzegouarene.tennisstatsapi.repos.PlayerEntityRepo;
 import fr.ali.amanzegouarene.tennisstatsapi.util.DataUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class PlayerService {
+
+    @Autowired
+    PlayerEntityRepo playerRepository;
 
     public Optional<List<Player>> getPlayersOrderedByRank(){
         List<Player> players = null;
@@ -40,5 +43,30 @@ public class PlayerService {
             throw new InternalServerErrorErrorException("An error occurred while trying to retrieve data, please contact your service provider");
         }
 
+    }
+
+    public PlayerEntity createPlayer(PlayerEntity player) {
+        playerRepository.save(player);
+        return player;
+    }
+
+    public List<PlayerEntity> getOfficialPlayers() throws IOException {
+        List<PlayerEntity> officialPlayers = new ArrayList<>();
+
+        List<String> playerNameList = DataUtil.getPlayers()
+                .stream()
+                .map(Player::getFirstname)
+                .distinct()
+                .toList();
+
+        for (String s : playerNameList) {
+            PlayerEntity playerEntity = playerRepository.findByFirstName(s);
+            if (playerEntity!=null) {
+                playerEntity.setOfficialPlayer(true);
+                officialPlayers.add(playerEntity);
+            }
+        }
+
+        return  officialPlayers;
     }
 }
